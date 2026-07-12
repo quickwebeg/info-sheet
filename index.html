@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickWeb Eg — Client Info Sheet</title>
+    <link rel="icon" type="image/png" href="QuickWeb Logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="QuickWeb Logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #171810;
+            color: #FFFFFF;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            height: 5px;
+            background: linear-gradient(90deg, #03FA6E, #00c853, #03FA6E);
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(3, 250, 110, 0.12);
+            color: #03FA6E;
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid rgba(3, 250, 110, 0.25);
+        }
+
+        h1 {
+            font-size: 30px;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 36px;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            color: #03FA6E;
+            font-size: 17px;
+            font-weight: 700;
+            margin-top: 36px;
+            margin-bottom: 18px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(3, 250, 110, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .form-group .hint {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="url"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: #1e1f16;
+            border: 1px solid #2a2b22;
+            border-radius: 8px;
+            padding: 11px 14px;
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #03FA6E;
+            box-shadow: 0 0 0 3px rgba(3, 250, 110, 0.08);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #444;
+        }
+
+        /* Toggle */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 46px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .toggle input { opacity: 0; width: 0; height: 0; }
+
+        .toggle-track {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #2a2b22;
+            border-radius: 26px;
+            transition: 0.3s;
+        }
+
+        .toggle-track:before {
+            content: "";
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: #666;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle input:checked + .toggle-track {
+            background: rgba(3, 250, 110, 0.25);
+        }
+
+        .toggle input:checked + .toggle-track:before {
+            transform: translateX(20px);
+            background: #03FA6E;
+        }
+
+        .toggle-text {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        /* Type selector cards */
+        .type-selector {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .type-card {
+            flex: 1;
+            background: #1e1f16;
+            border: 2px solid #2a2b22;
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .type-card:hover { border-color: #03FA6E; }
+
+        .type-card.active {
+            border-color: #03FA6E;
+            background: rgba(3, 250, 110, 0.04);
+        }
+
+        .type-card input { display: none; }
+
+        .type-card .icon { font-size: 24px; margin-bottom: 6px; }
+
+        .type-card .name {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .type-card .desc {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        /* Checklist */
+        .checklist {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #1e1f16;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #2a2b22;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .check-item:hover { border-color: #03FA6E; }
+
+        .check-item input { display: none; }
+
+        .check-item .box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #444;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .check-item input:checked ~ .box {
+            background: #03FA6E;
+            border-color: #03FA6E;
+        }
+
+        .check-item input:checked ~ .box::after {
+            content: "✓";
+            color: #171810;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .check-item .check-text { font-size: 13px; }
+
+        /* Conditional sections */
+        .conditional { display: none; }
+        .conditional.show { display: block; animation: fadeUp 0.35s ease; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Info box */
+        .info-box {
+            background: rgba(3, 250, 110, 0.06);
+            border: 1px solid rgba(3, 250, 110, 0.2);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 28px;
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.6;
+        }
+
+        .info-box strong { color: #fff; }
+
+        /* Buttons */
+        .submit-btn {
+            width: 100%;
+            background: #03FA6E;
+            color: #171810;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            margin-top: 32px;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #00e060;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(3, 250, 110, 0.25);
+        }
+
+        .copy-btn {
+            width: 100%;
+            background: transparent;
+            color: #03FA6E;
+            border: 2px solid #03FA6E;
+            border-radius: 10px;
+            padding: 13px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .copy-btn:hover { background: rgba(3, 250, 110, 0.08); }
+
+        /* Progress */
+        .progress-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #1e1f16;
+            z-index: 1000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #03FA6E;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #03FA6E;
+            color: #171810;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            z-index: 9999;
+            transition: transform 0.35s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 16px;
+            border-top: 1px solid #2a2b22;
+            color: #444;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 24px; }
+            .checklist { grid-template-columns: 1fr; }
+            .type-selector { flex-direction: column; }
+            .container { padding: 28px 16px 50px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-wrap">
+    <div class="progress-fill" id="progressBar"></div>
+</div>
+
+<div class="top-bar"></div>
+
+<div class="container">
+
+    <div class="badge">INFO SHEET</div>
+    <h1>Client Info Sheet</h1>
+    <p class="subtitle">Fill this in with as much detail as possible. The more you share, the better your website will be.</p>
+
+    <form id="clientForm">
+
+        <!-- WEBSITE TYPE -->
+        <h2 class="section-title">Website Type</h2>
+        <div class="type-selector">
+            <label class="type-card active" id="catalogCard">
+                <input type="radio" name="websiteType" value="catalog" checked>
+                <div class="icon">📄</div>
+                <div class="name">Catalog</div>
+                <div class="desc">Showcase your business</div>
+            </label>
+            <label class="type-card" id="ecomCard">
+                <input type="radio" name="websiteType" value="ecommerce">
+                <div class="icon">🛒</div>
+                <div class="name">E-Commerce</div>
+                <div class="desc">Sell products online</div>
+            </label>
+        </div>
+
+        <!-- BUSINESS DETAILS -->
+        <h2 class="section-title">Business Details</h2>
+
+        <div class="form-group">
+            <label>Business name (English)</label>
+            <div class="hint">Exactly how you want it on the website</div>
+            <input type="text" name="businessNameEn" required placeholder="e.g. Cairo Cuts Barbershop">
+        </div>
+
+        <div class="form-group">
+            <label>Business name (Arabic)</label>
+            <div class="hint">Leave blank if English only</div>
+            <input type="text" name="businessNameAr" placeholder="Optional">
+        </div>
+
+        <div class="form-group">
+            <label>What does your business do?</label>
+            <div class="hint">Describe your services or products in detail</div>
+            <textarea name="businessDesc" placeholder="Tell me about your business..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Tagline or slogan</label>
+            <div class="hint">e.g. "Quality service, fast delivery" — leave blank if none</div>
+            <input type="text" name="tagline" placeholder="Optional">
+        </div>
+
+        <!-- LOGO & BRANDING -->
+        <h2 class="section-title">Logo & Branding</h2>
+
+        <div class="form-group">
+            <label>Do you have a logo?</label>
+            <div class="toggle-row">
+                <label class="toggle">
+                    <input type="checkbox" name="hasLogo">
+                    <span class="toggle-track"></span>
+                </label>
+                <span class="toggle-text">Yes — I will send the PNG file on WhatsApp</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Brand colors</label>
+            <div class="hint">Hex codes or describe them (e.g. "dark blue and gold")</div>
+            <input type="text" name="brandColors" placeholder="e.g. #1a1a2e and gold">
+        </div>
+
+        <div class="form-group">
+            <label>2-3 websites you like the style of</label>
+            <div class="hint">Send links or describe what you like</div>
+            <textarea name="styleRef" placeholder="Links or description..."></textarea>
+        </div>
+
+        <!-- CONTACT INFO -->
+        <h2 class="section-title">Contact Info (shown on website)</h2>
+
+        <div class="form-group">
+            <label>WhatsApp number</label>
+            <input type="tel" name="whatsapp" required placeholder="01XXXXXXXXX">
+        </div>
+
+        <div class="form-group">
+            <label>Phone number (if different)</label>
+            <input type="tel" name="phone" placeholder="Optional">
+        </div>
+
+        <div class="form-group">
+            <label>Email address</label>
+            <input type="email" name="email" placeholder="email@example.com">
+        </div>
+
+        <div class="form-group">
+            <label>Physical address (if applicable)</label>
+            <input type="text" name="address" placeholder="Optional">
+        </div>
+
+        <div class="form-group">
+            <label>Instagram link</label>
+            <input type="url" name="instagram" placeholder="https://instagram.com/...">
+        </div>
+
+        <div class="form-group">
+            <label>Facebook link</label>
+            <input type="url" name="facebook" placeholder="https://facebook.com/...">
+        </div>
+
+        <div class="form-group">
+            <label>TikTok / other social</label>
+            <input type="text" name="tiktok" placeholder="Optional">
+        </div>
+
+        <!-- CATALOG SECTION -->
+        <div id="catalogSection" class="conditional show">
+            <h2 class="section-title">Pages You Want (Catalog)</h2>
+            <div class="hint" style="margin-bottom: 10px;">Select the pages you need:</div>
+
+            <div class="checklist">
+                <label class="check-item">
+                    <input type="checkbox" name="pages" value="Home" checked>
+                    <span class="box"></span>
+                    <span class="check-text">Home / Landing</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="pages" value="About">
+                    <span class="box"></span>
+                    <span class="check-text">About Us</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="pages" value="Services">
+                    <span class="box"></span>
+                    <span class="check-text">Services</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="pages" value="Products">
+                    <span class="box"></span>
+                    <span class="check-text">Products / Catalog</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="pages" value="Gallery">
+                    <span class="box"></span>
+                    <span class="check-text">Gallery / Photos</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="pages" value="Contact">
+                    <span class="box"></span>
+                    <span class="check-text">Contact</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="pages" value="Other">
+                    <span class="box"></span>
+                    <span class="check-text">Other</span>
+                </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 14px;">
+                <label>Other page details</label>
+                <input type="text" name="otherPage" placeholder="If you selected 'Other', what page?">
+            </div>
+        </div>
+
+        <!-- E-COMMERCE SECTION -->
+        <div id="ecomSection" class="conditional">
+            <h2 class="section-title">E-Commerce Details</h2>
+
+            <div class="form-group">
+                <label>How many products do you have?</label>
+                <input type="number" name="productCount" placeholder="e.g. 25">
+            </div>
+
+            <div class="form-group">
+                <label>Do you have product photos ready?</label>
+                <div class="toggle-row">
+                    <label class="toggle">
+                        <input type="checkbox" name="hasPhotos">
+                        <span class="toggle-track"></span>
+                    </label>
+                    <span class="toggle-text">Yes — I will send via Google Drive or WhatsApp</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Do you want Cash on Delivery?</label>
+                <div class="toggle-row">
+                    <label class="toggle">
+                        <input type="checkbox" name="wantCOD" checked>
+                        <span class="toggle-track"></span>
+                    </label>
+                    <span class="toggle-text">Yes</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Do you want online card payments (Visa/Mastercard)?</label>
+                <div class="toggle-row">
+                    <label class="toggle">
+                        <input type="checkbox" name="wantCard">
+                        <span class="toggle-track"></span>
+                    </label>
+                    <span class="toggle-text">Yes — I will register a Paymob account</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Do you want Bosta delivery integration?</label>
+                <div class="toggle-row">
+                    <label class="toggle">
+                        <input type="checkbox" name="wantBosta">
+                        <span class="toggle-track"></span>
+                    </label>
+                    <span class="toggle-text">Yes — I will register a Bosta account</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Collections / Categories</label>
+                <div class="hint">e.g. Men, Women, Sale, New Arrivals</div>
+                <input type="text" name="collections" placeholder="Separate with commas">
+            </div>
+
+            <div class="form-group">
+                <label>Do you already have a Shopify account?</label>
+                <div class="toggle-row">
+                    <label class="toggle">
+                        <input type="checkbox" name="hasShopify">
+                        <span class="toggle-track"></span>
+                    </label>
+                    <span class="toggle-text">Yes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOMAIN -->
+        <h2 class="section-title">Domain & Other</h2>
+
+        <div class="form-group">
+            <label>Do you already have a domain?</label>
+            <div class="toggle-row">
+                <label class="toggle">
+                    <input type="checkbox" name="hasDomain">
+                    <span class="toggle-track"></span>
+                </label>
+                <span class="toggle-text">Yes</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Preferred domain name</label>
+            <div class="hint">e.g. myshop.com — leave blank if you want a free subdomain link</div>
+            <input type="text" name="domainName" placeholder="yourbusiness.com">
+        </div>
+
+        <div class="form-group">
+            <label>Deadline — when do you need the website by?</label>
+            <input type="date" name="deadline">
+        </div>
+
+        <div class="form-group">
+            <label>Anything else I should know?</label>
+            <textarea name="notes" placeholder="Any extra details..."></textarea>
+        </div>
+
+        <div class="info-box">
+            <strong>Do not forget to send your photos on WhatsApp!</strong><br>
+            For catalog sites: photos of your shop, team, services, and products.<br>
+            For e-commerce: individual product photos with clean backgrounds — the better your photos, the better your store sells.
+        </div>
+
+        <button type="button" class="submit-btn" onclick="sendWhatsApp()">
+            Send on WhatsApp →
+        </button>
+
+        <button type="button" class="copy-btn" onclick="copyToClipboard()">
+            Copy to clipboard
+        </button>
+
+    </form>
+
+    <div class="footer">
+        QuickWeb Eg &copy; 2025
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // TYPE TOGGLE
+    const catalogCard = document.getElementById('catalogCard');
+    const ecomCard = document.getElementById('ecomCard');
+    const catalogSection = document.getElementById('catalogSection');
+    const ecomSection = document.getElementById('ecomSection');
+
+    document.querySelectorAll('input[name="websiteType"]').forEach(r => {
+        r.addEventListener('change', function() {
+            if (this.value === 'catalog') {
+                catalogCard.classList.add('active');
+                ecomCard.classList.remove('active');
+                catalogSection.classList.add('show');
+                ecomSection.classList.remove('show');
+            } else {
+                ecomCard.classList.add('active');
+                catalogCard.classList.remove('active');
+                ecomSection.classList.add('show');
+                catalogSection.classList.remove('show');
+            }
+            updateProgress();
+        });
+    });
+
+    // PROGRESS BAR
+    function updateProgress() {
+        const form = document.getElementById('clientForm');
+        const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="url"], input[type="number"], input[type="date"], textarea');
+        let filled = 0, total = 0;
+        inputs.forEach(input => {
+            const sec = input.closest('.conditional');
+            if (sec && !sec.classList.contains('show')) return;
+            total++;
+            if (input.value.trim() !== '') filled++;
+        });
+        const pct = total > 0 ? (filled / total) * 100 : 0;
+        document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    document.getElementById('clientForm').addEventListener('input', updateProgress);
+    document.getElementById('clientForm').addEventListener('change', updateProgress);
+
+    // COLLECT DATA
+    function collectData() {
+        const f = document.getElementById('clientForm');
+        const type = f.querySelector('input[name="websiteType"]:checked').value;
+        let d = '';
+        d += '⚡ QuickWeb Eg — Client Info\n';
+        d += '━'.repeat(30) + '\n\n';
+        d += 'Website Type: ' + (type === 'catalog' ? 'Catalog' : 'E-Commerce') + '\n\n';
+        d += '— Business Details —\n';
+        d += 'Name (EN): ' + (f.businessNameEn.value || '—') + '\n';
+        d += 'Name (AR): ' + (f.businessNameAr.value || '—') + '\n';
+        d += 'Description: ' + (f.businessDesc.value || '—') + '\n';
+        d += 'Tagline: ' + (f.tagline.value || '—') + '\n\n';
+        d += '— Logo & Branding —\n';
+        d += 'Has logo: ' + (f.hasLogo.checked ? 'Yes' : 'No') + '\n';
+        d += 'Colors: ' + (f.brandColors.value || '—') + '\n';
+        d += 'Style references: ' + (f.styleRef.value || '—') + '\n\n';
+        d += '— Contact Info —\n';
+        d += 'WhatsApp: ' + (f.whatsapp.value || '—') + '\n';
+        d += 'Phone: ' + (f.phone.value || '—') + '\n';
+        d += 'Email: ' + (f.email.value || '—') + '\n';
+        d += 'Address: ' + (f.address.value || '—') + '\n';
+        d += 'Instagram: ' + (f.instagram.value || '—') + '\n';
+        d += 'Facebook: ' + (f.facebook.value || '—') + '\n';
+        d += 'TikTok: ' + (f.tiktok.value || '—') + '\n\n';
+
+        if (type === 'catalog') {
+            const pages = [];
+            f.querySelectorAll('input[name="pages"]:checked').forEach(c => pages.push(c.value));
+            d += '— Pages —\n';
+            d += (pages.join(', ') || '—') + '\n';
+            if (f.otherPage.value) d += 'Other page: ' + f.otherPage.value + '\n';
+            d += '\n';
+        }
+
+        if (type === 'ecommerce') {
+            d += '— E-Commerce Details —\n';
+            d += 'Products: ' + (f.productCount.value || '—') + '\n';
+            d += 'Photos ready: ' + (f.hasPhotos.checked ? 'Yes' : 'No') + '\n';
+            d += 'COD: ' + (f.wantCOD.checked ? 'Yes' : 'No') + '\n';
+            d += 'Card payments: ' + (f.wantCard.checked ? 'Yes' : 'No') + '\n';
+            d += 'Bosta: ' + (f.wantBosta.checked ? 'Yes' : 'No') + '\n';
+            d += 'Collections: ' + (f.collections.value || '—') + '\n';
+            d += 'Has Shopify: ' + (f.hasShopify.checked ? 'Yes' : 'No') + '\n\n';
+        }
+
+        d += '— Domain —\n';
+        d += 'Has domain: ' + (f.hasDomain.checked ? 'Yes' : 'No') + '\n';
+        d += 'Preferred domain: ' + (f.domainName.value || '—') + '\n';
+        d += 'Deadline: ' + (f.deadline.value || '—') + '\n\n';
+
+        if (f.notes.value) {
+            d += '— Notes —\n';
+            d += f.notes.value + '\n';
+        }
+
+        return d;
+    }
+
+    // SEND WHATSAPP — CHANGE THE NUMBER BELOW
+    function sendWhatsApp() {
+        const f = document.getElementById('clientForm');
+        if (!f.businessNameEn.value || !f.whatsapp.value) {
+            alert('Please fill in at least the business name and WhatsApp number.');
+            return;
+        }
+        const data = collectData();
+        const yourNumber = '201XXXXXXXXX'; // <-- PUT YOUR NUMBER HERE
+        window.open('https://wa.me/' + yourNumber + '?text=' + encodeURIComponent(data), '_blank');
+    }
+
+    // COPY
+    function copyToClipboard() {
+        const data = collectData();
+        navigator.clipboard.writeText(data).then(() => {
+            showToast('Copied!');
+        }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = data;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('Copied!');
+        });
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    updateProgress();
+</script>
+
+</body>
+</html>
