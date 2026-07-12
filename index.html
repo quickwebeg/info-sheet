@@ -377,6 +377,89 @@
 
         .copy-btn:hover { background: rgba(3, 250, 110, 0.08); }
 
+        .preview-btn {
+            width: 100%;
+            background: transparent;
+            color: #888;
+            border: 1px dashed #444;
+            border-radius: 10px;
+            padding: 13px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .preview-btn:hover {
+            color: #03FA6E;
+            border-color: #03FA6E;
+        }
+
+        .preview-panel {
+            display: none;
+            margin-top: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #2a2b22;
+            animation: fadeUp 0.35s ease;
+        }
+
+        .preview-panel.show { display: block; }
+
+        .preview-header {
+            background: #1e1f16;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+            color: #03FA6E;
+            border-bottom: 1px solid #2a2b22;
+        }
+
+        .preview-close {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+            font-family: 'Inter', sans-serif;
+            transition: color 0.2s;
+        }
+
+        .preview-close:hover { color: #fff; }
+
+        .preview-content {
+            background: #0b3d2c;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #e4e6eb;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+            border-left: 4px solid #25D366;
+        }
+
+        .preview-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .preview-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .preview-content::-webkit-scrollbar-thumb {
+            background: #25D366;
+            border-radius: 3px;
+        }
+
         /* Progress */
         .progress-wrap {
             position: fixed;
@@ -723,6 +806,18 @@
             Copy to clipboard
         </button>
 
+        <button type="button" class="preview-btn" onclick="togglePreview()">
+            👁️ Preview Message
+        </button>
+
+        <div class="preview-panel" id="previewPanel">
+            <div class="preview-header">
+                <span>📱 WhatsApp Message Preview</span>
+                <button class="preview-close" onclick="togglePreview()">✕</button>
+            </div>
+            <pre class="preview-content" id="previewContent"></pre>
+        </div>
+
     </form>
 
     <div class="footer">
@@ -806,64 +901,168 @@
     document.getElementById('clientForm').addEventListener('change', updateProgress);
 
     // ═══════════════════════════════════════════
-    // COLLECT DATA
+    // COLLECT DATA (WhatsApp formatted)
     // ═══════════════════════════════════════════
     function collectData() {
         const f = document.getElementById('clientForm');
         const type = f.querySelector('input[name="websiteType"]:checked').value;
-        let d = '';
-        d += '⚡ QuickWeb Eg — Client Info\n';
-        d += '━'.repeat(30) + '\n\n';
-        d += 'Website Type: ' + (type === 'catalog' ? 'Catalog' : 'E-Commerce') + '\n\n';
-        d += '— Business Details —\n';
-        d += 'Name (EN): ' + (f.businessNameEn.value || '—') + '\n';
-        d += 'Name (AR): ' + (f.businessNameAr.value || '—') + '\n';
-        d += 'Description: ' + (f.businessDesc.value || '—') + '\n';
-        d += 'Tagline: ' + (f.tagline.value || '—') + '\n\n';
-        d += '— Logo & Branding —\n';
-        d += 'Has logo: ' + (f.hasLogo.checked ? 'Yes' : 'No') + '\n';
-        d += 'Colors: ' + (f.brandColors.value || '—') + '\n';
-        d += 'Style references: ' + (f.styleRef.value || '—') + '\n\n';
-        d += '— Contact Info —\n';
-        d += 'WhatsApp: ' + (f.whatsapp.value || '—') + '\n';
-        d += 'Phone: ' + (f.phone.value || '—') + '\n';
-        d += 'Email: ' + (f.email.value || '—') + '\n';
-        d += 'Address: ' + (f.address.value || '—') + '\n';
-        d += 'Instagram: ' + (f.instagram.value || '—') + '\n';
-        d += 'Facebook: ' + (f.facebook.value || '—') + '\n';
-        d += 'TikTok: ' + (f.tiktok.value || '—') + '\n\n';
 
+        // Helper: only add a line if the value exists
+        const line = (emoji, label, val) => {
+            if (!val || val.trim() === '') return '';
+            return emoji + '  *' + label + ':*  ' + val.trim() + '\n';
+        };
+
+        const toggle = (emoji, label, checked, yesText, noText) => {
+            return emoji + '  *' + label + ':*  ' + (checked ? (yesText || '✅ Yes') : (noText || '❌ No')) + '\n';
+        };
+
+        const divider = '═══════════════════════';
+        const thinDivider = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
+
+        // Format deadline nicely
+        let deadlineFormatted = '';
+        if (f.deadline.value) {
+            const d = new Date(f.deadline.value);
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            deadlineFormatted = d.toLocaleDateString('en-US', options);
+        }
+
+        let m = '';
+
+        // ── HEADER ──
+        m += '⚡ *QUICKWEB EG*\n';
+        m += '_New Client Info Sheet_\n';
+        m += divider + '\n\n';
+
+        // ── TYPE BADGE ──
         if (type === 'catalog') {
+            m += '🏷️  *Project Type:*  📄 Catalog Website\n\n';
+        } else {
+            m += '🏷️  *Project Type:*  🛒 E-Commerce Store\n\n';
+        }
+
+        // ── SECTION 1: BUSINESS ──
+        m += '╔══════════════════════╗\n';
+        m += '   🏢  *BUSINESS DETAILS*\n';
+        m += '╚══════════════════════╝\n\n';
+
+        m += line('▸', 'Business Name', f.businessNameEn.value);
+        m += line('▸', 'الاسم بالعربي', f.businessNameAr.value);
+        if (f.businessDesc.value && f.businessDesc.value.trim()) {
+            m += '\n📝  *About the Business:*\n';
+            m += '_' + f.businessDesc.value.trim() + '_\n';
+        }
+        m += line('💬', 'Tagline', f.tagline.value);
+        m += '\n';
+
+        // ── SECTION 2: BRANDING ──
+        m += thinDivider + '\n';
+        m += '🎨  *LOGO & BRANDING*\n';
+        m += thinDivider + '\n\n';
+
+        m += toggle('🖼️', 'Has Logo', f.hasLogo.checked, '✅ Yes — will send on WhatsApp', '❌ No — needs one');
+        m += line('🎨', 'Brand Colors', f.brandColors.value);
+        if (f.styleRef.value && f.styleRef.value.trim()) {
+            m += '\n🔗  *Style References:*\n';
+            m += '_' + f.styleRef.value.trim() + '_\n';
+        }
+        m += '\n';
+
+        // ── SECTION 3: CONTACT ──
+        m += thinDivider + '\n';
+        m += '📞  *CONTACT INFORMATION*\n';
+        m += thinDivider + '\n\n';
+
+        m += line('💬', 'WhatsApp', f.whatsapp.value);
+        m += line('📱', 'Phone', f.phone.value);
+        m += line('✉️', 'Email', f.email.value);
+        m += line('📍', 'Address', f.address.value);
+        m += '\n';
+
+        // Social links — group them nicely
+        const hasAnySocial = f.instagram.value || f.facebook.value || f.tiktok.value;
+        if (hasAnySocial) {
+            m += '🌐  *Socials:*\n';
+            if (f.instagram.value.trim()) m += '   ▪️ IG → ' + f.instagram.value.trim() + '\n';
+            if (f.facebook.value.trim()) m += '   ▪️ FB → ' + f.facebook.value.trim() + '\n';
+            if (f.tiktok.value.trim()) m += '   ▪️ TT → ' + f.tiktok.value.trim() + '\n';
+            m += '\n';
+        }
+
+        // ── SECTION 4: CATALOG PAGES ──
+        if (type === 'catalog') {
+            m += thinDivider + '\n';
+            m += '📑  *REQUESTED PAGES*\n';
+            m += thinDivider + '\n\n';
+
+            const pageEmojis = {
+                'Home': '🏠', 'About': 'ℹ️', 'Services': '⚙️',
+                'Products': '📦', 'Gallery': '🖼️', 'Contact': '📞', 'Other': '➕'
+            };
             const pages = [];
-            f.querySelectorAll('input[name="pages"]:checked').forEach(c => pages.push(c.value));
-            d += '— Pages —\n';
-            d += (pages.join(', ') || '—') + '\n';
-            if (f.otherPage.value) d += 'Other page: ' + f.otherPage.value + '\n';
-            d += '\n';
+            f.querySelectorAll('input[name="pages"]:checked').forEach(c => {
+                const emoji = pageEmojis[c.value] || '▪️';
+                pages.push('   ' + emoji + '  ' + c.value);
+            });
+            if (pages.length > 0) {
+                m += pages.join('\n') + '\n';
+            } else {
+                m += '   _No pages selected_\n';
+            }
+            if (f.otherPage.value && f.otherPage.value.trim()) {
+                m += '\n📌  *Other Page:*  ' + f.otherPage.value.trim() + '\n';
+            }
+            m += '\n';
         }
 
+        // ── SECTION 5: E-COMMERCE ──
         if (type === 'ecommerce') {
-            d += '— E-Commerce Details —\n';
-            d += 'Products: ' + (f.productCount.value || '—') + '\n';
-            d += 'Photos ready: ' + (f.hasPhotos.checked ? 'Yes' : 'No') + '\n';
-            d += 'COD: ' + (f.wantCOD.checked ? 'Yes' : 'No') + '\n';
-            d += 'Card payments: ' + (f.wantCard.checked ? 'Yes' : 'No') + '\n';
-            d += 'Bosta: ' + (f.wantBosta.checked ? 'Yes' : 'No') + '\n';
-            d += 'Collections: ' + (f.collections.value || '—') + '\n';
-            d += 'Has Shopify: ' + (f.hasShopify.checked ? 'Yes' : 'No') + '\n\n';
+            m += thinDivider + '\n';
+            m += '🛒  *E-COMMERCE DETAILS*\n';
+            m += thinDivider + '\n\n';
+
+            m += line('📦', 'Number of Products', f.productCount.value);
+            m += toggle('📸', 'Product Photos Ready', f.hasPhotos.checked, '✅ Yes — will send', '❌ No');
+            m += line('🏷️', 'Collections', f.collections.value);
+            m += '\n';
+
+            m += '💳  *Payment & Shipping:*\n';
+            m += toggle('   💵', 'Cash on Delivery', f.wantCOD.checked);
+            m += toggle('   💳', 'Card Payments', f.wantCard.checked, '✅ Yes — will register Paymob', '❌ No');
+            m += toggle('   🚚', 'Bosta Integration', f.wantBosta.checked, '✅ Yes — will register Bosta', '❌ No');
+            m += '\n';
+
+            m += toggle('🟢', 'Has Shopify Account', f.hasShopify.checked);
+            m += '\n';
         }
 
-        d += '— Domain —\n';
-        d += 'Has domain: ' + (f.hasDomain.checked ? 'Yes' : 'No') + '\n';
-        d += 'Preferred domain: ' + (f.domainName.value || '—') + '\n';
-        d += 'Deadline: ' + (f.deadline.value || '—') + '\n\n';
+        // ── SECTION 6: DOMAIN ──
+        m += thinDivider + '\n';
+        m += '🌐  *DOMAIN & TIMELINE*\n';
+        m += thinDivider + '\n\n';
 
-        if (f.notes.value) {
-            d += '— Notes —\n';
-            d += f.notes.value + '\n';
+        m += toggle('🔗', 'Has Domain', f.hasDomain.checked, '✅ Yes — already purchased', '❌ No — needs one');
+        m += line('🌍', 'Preferred Domain', f.domainName.value);
+        if (deadlineFormatted) {
+            m += '📅  *Deadline:*  ' + deadlineFormatted + '\n';
+        }
+        m += '\n';
+
+        // ── SECTION 7: NOTES ──
+        if (f.notes.value && f.notes.value.trim()) {
+            m += thinDivider + '\n';
+            m += '📋  *ADDITIONAL NOTES*\n';
+            m += thinDivider + '\n\n';
+            m += '> _' + f.notes.value.trim() + '_\n\n';
         }
 
-        return d;
+        // ── FOOTER ──
+        m += divider + '\n';
+        m += '📨  _Submitted via QuickWeb Eg Info Sheet_\n';
+        m += '⏰  _' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' • ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + '_\n';
+
+        return m;
     }
 
     // ═══════════════════════════════════════════
@@ -897,6 +1096,22 @@
             document.body.removeChild(ta);
             showToast('Copied!');
         });
+    }
+
+    // ═══════════════════════════════════════════
+    // PREVIEW TOGGLE
+    // ═══════════════════════════════════════════
+    function togglePreview() {
+        const panel = document.getElementById('previewPanel');
+        const content = document.getElementById('previewContent');
+        if (panel.classList.contains('show')) {
+            panel.classList.remove('show');
+        } else {
+            content.textContent = collectData();
+            panel.classList.add('show');
+            // Scroll to preview
+            setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        }
     }
 
     function showToast(msg) {
