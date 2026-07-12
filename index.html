@@ -7,6 +7,16 @@
     <link rel="icon" type="image/png" href="QuickWeb Logo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="QuickWeb Logo.png">
     <style>
+    /* @import MUST be at the very top of the stylesheet */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    /* ═══════════════════════════════════════════
+        CSS VARIABLES (was missing --green)
+    ═══════════════════════════════════════════ */
+    :root {
+        --green: #03FA6E;
+    }
+
     /* ═══════════════════════════════════════════
         CUSTOM CURSOR
     ═══════════════════════════════════════════ */
@@ -36,8 +46,11 @@
     }
     body.hovered #cursor-dot { width: 6px; height: 6px; background: var(--green); }
     body.hovered #cursor-ring { width: 60px; height: 60px; border-color: var(--green); }
-    /* . */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    /* Hide custom cursor on touch devices */
+    @media (hover: none) and (pointer: coarse) {
+        #cursor-dot, #cursor-ring { display: none; }
+    }
 
         * {
             margin: 0;
@@ -50,6 +63,12 @@
             background: #171810;
             color: #FFFFFF;
             min-height: 100vh;
+            cursor: none; /* Hide default cursor for custom cursor effect */
+        }
+
+        /* Show default cursor on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            body { cursor: auto; }
         }
 
         .top-bar {
@@ -414,6 +433,10 @@
 </head>
 <body>
 
+<!-- Custom Cursor Elements (were missing from original HTML) -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
 <div class="progress-wrap">
     <div class="progress-fill" id="progressBar"></div>
 </div>
@@ -703,14 +726,43 @@
     </form>
 
     <div class="footer">
-        QuickWeb Eg &copy; 2026
+        QuickWeb Eg © 2026
     </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+    // ═══════════════════════════════════════════
+    // CUSTOM CURSOR (was missing from original)
+    // ═══════════════════════════════════════════
+    const cursorDot = document.getElementById('cursor-dot');
+    const cursorRing = document.getElementById('cursor-ring');
+
+    // Only enable custom cursor on non-touch devices
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        document.addEventListener('mousemove', (e) => {
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+            cursorRing.style.left = e.clientX + 'px';
+            cursorRing.style.top = e.clientY + 'px';
+        });
+
+        // Add hover effect on interactive elements
+        const hoverTargets = document.querySelectorAll('a, button, input, textarea, select, label, .type-card, .check-item, .toggle');
+        hoverTargets.forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovered'));
+        });
+    } else {
+        // Hide custom cursor on touch devices
+        cursorDot.style.display = 'none';
+        cursorRing.style.display = 'none';
+    }
+
+    // ═══════════════════════════════════════════
     // TYPE TOGGLE
+    // ═══════════════════════════════════════════
     const catalogCard = document.getElementById('catalogCard');
     const ecomCard = document.getElementById('ecomCard');
     const catalogSection = document.getElementById('catalogSection');
@@ -733,7 +785,9 @@
         });
     });
 
+    // ═══════════════════════════════════════════
     // PROGRESS BAR
+    // ═══════════════════════════════════════════
     function updateProgress() {
         const form = document.getElementById('clientForm');
         const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="url"], input[type="number"], input[type="date"], textarea');
@@ -751,7 +805,9 @@
     document.getElementById('clientForm').addEventListener('input', updateProgress);
     document.getElementById('clientForm').addEventListener('change', updateProgress);
 
+    // ═══════════════════════════════════════════
     // COLLECT DATA
+    // ═══════════════════════════════════════════
     function collectData() {
         const f = document.getElementById('clientForm');
         const type = f.querySelector('input[name="websiteType"]:checked').value;
@@ -810,11 +866,13 @@
         return d;
     }
 
+    // ═══════════════════════════════════════════
     // SEND WHATSAPP — CHANGE THE NUMBER BELOW
+    // ═══════════════════════════════════════════
     function sendWhatsApp() {
         const f = document.getElementById('clientForm');
         if (!f.businessNameEn.value || !f.whatsapp.value) {
-            alert('Please fill in at least the business name and WhatsApp number.');
+            showToast('Please fill in business name & WhatsApp');
             return;
         }
         const data = collectData();
@@ -822,12 +880,15 @@
         window.open('https://wa.me/' + yourNumber + '?text=' + encodeURIComponent(data), '_blank');
     }
 
-    // COPY
+    // ═══════════════════════════════════════════
+    // COPY TO CLIPBOARD
+    // ═══════════════════════════════════════════
     function copyToClipboard() {
         const data = collectData();
         navigator.clipboard.writeText(data).then(() => {
             showToast('Copied!');
         }).catch(() => {
+            // Fallback for older browsers
             const ta = document.createElement('textarea');
             ta.value = data;
             document.body.appendChild(ta);
@@ -845,6 +906,7 @@
         setTimeout(() => t.classList.remove('show'), 2200);
     }
 
+    // Initialize progress on load
     updateProgress();
 </script>
 
